@@ -8,7 +8,7 @@ You are probably aware that majority of mods that modify carry weight conflict w
 So I made this little thing.
 
 - This allows multiple mods to modify carry weight without overwriting each other changes.
-- Supports flat bonuses and multiplicators for both base weight (before str applied) and total max weight (after str bonuses are applied)
+- Supports flat bonuses and multiplications for both base weight (before str applied) and total max weight (after str bonuses are applied)
 
 So something like this is possible and very easy to do now: 
 
@@ -24,7 +24,7 @@ Just remove .txt so your IDE makes it easier to read.
 
 [h1]GitHub and Discord[/h1]
 If you want to submit translation files, make suggestions or report bugs, the easiest way to do it would be on Discord.
-[url=https://discord.gg/8pBN5Ccm7z][img]https://cdn.iconscout.com/icon/free/png-256/discord-3691244-3073764.png[/img][/url][url=][img]https://cdn.iconscout.com/icon/free/png-256/github-163-761603.png[/img][/url]
+[url=https://discord.gg/8pBN5Ccm7z][img]https://cdn.iconscout.com/icon/free/png-256/discord-3691244-3073764.png[/img][/url][url=https://github.com/MusicManiac/UnifiedCarryWeightFramework][img]https://cdn.iconscout.com/icon/free/png-256/github-163-761603.png[/img][/url]
 
 [h1]Credits and Translations[/h1]
 Huge thanks to [url=https://steamcommunity.com/profiles/76561198042464272]Albion[/url] for assist.
@@ -42,4 +42,4 @@ Redistribution of this mod without explicit permission from the creator is prohi
 © 2026 [url=https://steamcommunity.com/profiles/76561198152820942]MusicManiac[/url] (SteamID64: 76561198152820942)[/quote]
 
 Workshop ID: 3682045254
-Mod ID: UnifiedUnifiedCarryWeightFramework
+Mod ID: UnifiedCarryWeightFramework

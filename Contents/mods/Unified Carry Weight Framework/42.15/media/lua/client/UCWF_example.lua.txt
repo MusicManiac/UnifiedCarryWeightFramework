@@ -95,7 +95,7 @@ local function yourFunctionThatAddsTrait(player)
 	end
 end
 
--- And last thing: Don't want to add hard dependency for this mod? You can add wrap everything in a check if framework is present and then when people complain to you about your mod conflicting with other mod that changes weight, you can direct them to this framework.
+-- And last thing: Don't want to add hard dependency for this mod? You can add wrap everything in a check if framework is present and then when people complain to you about your mod conflicting with other mod that changes weight, you can direct them to this framework. Which is not preferable, because then you'd have to keep telling people to use this framework.
 
 if getActivatedMods():contains("UnifiedUnifiedCarryWeightFramework") then
 	require("UnifiedCarryWeightFramework")
@@ -113,4 +113,6 @@ if getActivatedMods():contains("UnifiedUnifiedCarryWeightFramework") then
 			return {}
 		end,
 	})
+else
+	-- set weight manually on your end
 end

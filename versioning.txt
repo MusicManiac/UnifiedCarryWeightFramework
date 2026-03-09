@@ -1,6 +1,6 @@
 REMINDER: Don't forget to update mod.info with new mod version
 
-[url=](Properly formatted changelog can be found here)[/url]
+[url=https://github.com/MusicManiac/UnifiedCarryWeightFramework/blob/main/CHANGELOG.md](Properly formatted changelog can be found here)[/url]
 
 v.1.x.x
 

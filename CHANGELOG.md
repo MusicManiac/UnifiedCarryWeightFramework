@@ -3,6 +3,7 @@
 
 - Fixes:
 	- Changed extension of example lua file.
+  - Mod id fix
 
 
 ## v.1.0.0

@@ -1,4 +1,4 @@
-[url=](Properly formatted changelog can be found here)[/url]
+[url=https://github.com/MusicManiac/UnifiedCarryWeightFramework/blob/main/CHANGELOG.md](Properly formatted changelog can be found here)[/url]
 
 v.1.0.1
 
