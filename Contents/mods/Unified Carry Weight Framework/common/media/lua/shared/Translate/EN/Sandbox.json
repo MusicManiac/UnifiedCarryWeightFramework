@@ -1,0 +1,5 @@
+{
+	"Sandbox_UnifiedCarryWeightFramework" : "Unified Carry Weight Framework",
+    "Sandbox_UnifiedCarryWeightFramework_CapWeight" : "Cap max weight at 50",
+    "Sandbox_UnifiedCarryWeightFramework_CapWeight_tooltip" : "PZ hardcoded on java-side to not allow player to carry more than 50kg/lb of items. If you run java mod that removes this limit, then you don't have to cap max weight at 50 and you should uncheck this box."
+}

@@ -1,0 +1,9 @@
+VERSION = 1,
+
+option UnifiedCarryWeightFramework.CapWeight
+{
+	type = boolean,
+	default = true,
+	page = UnifiedCarryWeightFramework,
+	translation = UnifiedCarryWeightFramework_CapWeight,
+}

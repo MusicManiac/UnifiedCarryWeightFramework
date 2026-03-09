@@ -1,0 +1,6 @@
+version=1
+id=3682045254
+title=Unified Carry Weight Framework (UCWF)
+description=Allows multiple mods to edit carry weight in non-conflicting way
+tags=Build 42;Framework;QoL
+visibility=public
