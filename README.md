@@ -1,10 +1,10 @@
 # Unified Carry Weight Framework (UCWF)
 Repo for PZ framework "Unified Carry Weight Framework (UCWF)"
 
-### [Changelog can be found here]()
+### [Changelog can be found here](https://github.com/MusicManiac/UnifiedCarryWeightFramework/blob/main/CHANGELOG.md)
 
 
-Mod page with detailed description along with permissions can be found here: [Unified Carry Weight Framework (UCWF)]()
+Mod page with detailed description along with permissions can be found here: [Unified Carry Weight Framework (UCWF)](https://steamcommunity.com/sharedfiles/filedetails/?id=3682045254)
 
 >⛔ Permissions
 >
