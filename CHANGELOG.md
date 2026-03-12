@@ -1,3 +1,11 @@
+## v.2.0.0
+###### 12 Mar 2026
+
+- General:
+	- Example file polishing
+	- MP support, moved everything to server-side.
+	- Moved mod option into sandbox option due to change from client to server.
+
 ## v.1.0.1
 ###### 09 Mar 2026
 

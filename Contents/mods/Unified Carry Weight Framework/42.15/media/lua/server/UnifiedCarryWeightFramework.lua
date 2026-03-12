@@ -1,19 +1,10 @@
-require("UCWF_ModOptions")
-
 UnifiedCarryWeightFramework = UnifiedCarryWeightFramework or {}
 
 UnifiedCarryWeightFramework.baseModifiers = UnifiedCarryWeightFramework.baseModifiers or {}
 UnifiedCarryWeightFramework.maxModifiers = UnifiedCarryWeightFramework.maxModifiers or {}
 
-local function initializeModOptions(playerIndex, player)
-	modOptions = PZAPI.ModOptions:getOptions("UCWFModOptions")
-end
-
-Events.OnCreatePlayer.Remove(initializeModOptions)
-Events.OnCreatePlayer.Add(initializeModOptions)
-
 local log = function(...)
-	if modOptions and modOptions:getOption("GatherDetailedDebugUCWF"):getValue() then
+	if SandboxVars.UnifiedCarryWeightFramework.GatherDetailedDebug then
 		print("UCWF | " .. ...)
 	end
 end
@@ -71,59 +62,82 @@ function UnifiedCarryWeightFramework.registerMaxModifier(def)
 	systemShouldRun = true
 end
 
---- Function that recomputes the carry weight for a player, applying all modifiers in the correct ordering
----@param player IsoPlayer
-function UnifiedCarryWeightFramework.recomputeAll(player)
+local function gameMode()
+	if not isClient() and not isServer() then
+		return "SP"
+	elseif isClient() then
+		return "MP_Client"
+	elseif isServer() then
+		return "MP_Server"
+	end
+end
+
+local function getPlayerList()
+	if gameMode() == "SP" then
+		return { getPlayer() }
+	end
+
+	local players = {}
+	local onlinePlayers = getOnlinePlayers()
+
+	for i = 0, onlinePlayers:size() - 1 do
+		players[#players + 1] = onlinePlayers:get(i)
+	end
+
+	return players
+end
+
+--- Function that recomputes the carry weight for players, applying all modifiers in the correct ordering
+function UnifiedCarryWeightFramework.recomputeAll()
 	if not systemShouldRun then
 		log("No carry weight modifiers registered, skipping recompute and unregistering events")
 		Events.EveryHours.Remove(recomputeCarryWeight_EveryHours)
 		Events.EveryHours.Remove(debugDumpCarryWeight_EveryHours)
 		return
 	end
-	player = player or getPlayer()
-	log("Recomputing carry weight")
-	local originalBaseWeight = 8
-	player:setMaxWeightDelta(1)
+	for _, player in ipairs(getPlayerList()) do
+		log("Recomputing carry weight for player " .. tostring(player:getUsername()))
+		local originalBaseWeight = 8
+		player:setMaxWeightDelta(1)
 
-	local baseContext = {
-		player = player,
-	}
+		local baseContext = {
+			player = player,
+		}
 
-	local newBaseWeight =
-		applyModifierPipeline(originalBaseWeight, UnifiedCarryWeightFramework.baseModifiers, baseContext)
-	log("New base weight: " .. tostring(newBaseWeight))
-	player:setMaxWeightBase(newBaseWeight)
+		local newBaseWeight =
+			applyModifierPipeline(originalBaseWeight, UnifiedCarryWeightFramework.baseModifiers, baseContext)
+		log("New base weight: " .. tostring(newBaseWeight))
+		player:setMaxWeightBase(newBaseWeight)
 
-	player:getBodyDamage():Update()
+		player:getBodyDamage():Update()
 
-	local maxContext = {
-		player = player,
-	}
-	local currentMaxWeight = player:getMaxWeight()
-	log("Current max weight before max modifiers: " .. tostring(currentMaxWeight))
-	local newMaxWeight = applyModifierPipeline(currentMaxWeight, UnifiedCarryWeightFramework.maxModifiers, maxContext)
-	if SandboxVars.UnifiedCarryWeightFramework.CapWeight then
-		newMaxWeight = math.min(newMaxWeight, 50)
+		local maxContext = {
+			player = player,
+		}
+		local currentMaxWeight = player:getMaxWeight()
+		log("Current max weight before max modifiers: " .. tostring(currentMaxWeight))
+		local newMaxWeight =
+			applyModifierPipeline(currentMaxWeight, UnifiedCarryWeightFramework.maxModifiers, maxContext)
+		if SandboxVars.UnifiedCarryWeightFramework.CapWeight then
+			newMaxWeight = math.min(newMaxWeight, 50)
+		end
+		log("New max weight: " .. tostring(newMaxWeight))
+		local deltaToSet = newMaxWeight / player:getMaxWeight()
+		log("Setting max weight delta to: " .. tostring(deltaToSet))
+
+		player:setMaxWeightDelta(deltaToSet)
 	end
-	log("New max weight: " .. tostring(newMaxWeight))
-	local deltaToSet = newMaxWeight / player:getMaxWeight()
-	log("Setting max weight delta to: " .. tostring(deltaToSet))
-
-	player:setMaxWeightDelta(deltaToSet)
 end
 
 ---Function responsible for initializing all traits logic
 ---@param playerIndex number
 ---@param player IsoPlayer
 local function recomputeCarryWeight_OnCreatePlayer(playerIndex, player)
-	if not player or not instanceof(player, "IsoPlayer") then
-		player = getPlayer()
-	end
-	UnifiedCarryWeightFramework.recomputeAll(player)
+	UnifiedCarryWeightFramework.recomputeAll()
 end
 
 local function recomputeCarryWeight_EveryHours()
-	UnifiedCarryWeightFramework.recomputeAll(nil)
+	UnifiedCarryWeightFramework.recomputeAll()
 end
 
 local function debugDumpCarryWeight_EveryHours()

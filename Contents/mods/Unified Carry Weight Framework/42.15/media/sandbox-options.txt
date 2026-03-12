@@ -7,3 +7,10 @@ option UnifiedCarryWeightFramework.CapWeight
 	page = UnifiedCarryWeightFramework,
 	translation = UnifiedCarryWeightFramework_CapWeight,
 }
+option UnifiedCarryWeightFramework.GatherDetailedDebug
+{
+	type = boolean,
+	default = false,
+	page = UnifiedCarryWeightFramework,
+	translation = UnifiedCarryWeightFramework_GatherDetailedDebug,
+}

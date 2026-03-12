@@ -1,4 +1,0 @@
-{
-	"UI_UCWF_Options_GatherDetailedDebug": "Gather Detailed Debug Information",
-	"UI_UCWF_Options_GatherDetailedDebug_tooltip": "Enables prints into console.txt. Useful for debug purposes."
-}

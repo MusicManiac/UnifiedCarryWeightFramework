@@ -1,5 +1,10 @@
+-- this is just to prevent this file from ever running in-game.
+if true then
+	return
+end
+
 --- Example of how to register modifiers for the Unified Carry Weight Framework.
---- 1. Code is expected to be ran on the client so your lua file gotta be in client folder as well.
+--- 1. Code is expected to be ran on the server side so your lua file gotta be in server folder as well.
 --- 2. require the main framework lua file
 require("UnifiedCarryWeightFramework")
 
@@ -54,9 +59,7 @@ UnifiedCarryWeightFramework.registerBaseModifier({
 
 local function recomputeCarryWeight_LevelPerk(character, perk, level, increased)
 	-- DO NOT put your logic here, all you have to do is call recomputeAll in here. The logic deciding how much to add or multiply should be in the resolve function of the modifier, and the framework will take care of calling it and applying the modifiers in the correct order.
-	if character then
-		UnifiedCarryWeightFramework.recomputeAll(character)
-	end
+	UnifiedCarryWeightFramework.recomputeAll()
 end
 
 Events.LevelPerk.Remove(recomputeCarryWeight_LevelPerk)
