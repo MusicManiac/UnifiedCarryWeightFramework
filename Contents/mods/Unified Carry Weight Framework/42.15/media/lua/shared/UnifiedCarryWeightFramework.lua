@@ -1,11 +1,28 @@
+local function gameMode()
+	if not isClient() and not isServer() then
+		return "SP"
+	elseif isClient() then
+		return "MP_Client"
+	end
+	return "MP_Server"
+end
+
+-- This should be ran only if it's SP or if it's a server process
+if gameMode() == "MP_Client" then
+	print("UCWF | UnifiedCarryWeightFramework | Detected MP client environment, skipping the file")
+	return
+else
+	print("UCWF | UnifiedCarryWeightFramework | Detected SP or server environment, loading the file")
+end
+
 UnifiedCarryWeightFramework = UnifiedCarryWeightFramework or {}
 
 UnifiedCarryWeightFramework.baseModifiers = UnifiedCarryWeightFramework.baseModifiers or {}
 UnifiedCarryWeightFramework.maxModifiers = UnifiedCarryWeightFramework.maxModifiers or {}
 
-local log = function(...)
+function UnifiedCarryWeightFramework.log(...)
 	if SandboxVars.UnifiedCarryWeightFramework.GatherDetailedDebug then
-		print("UCWF | " .. ...)
+		print("UCWF | UnifiedCarryWeightFramework | " .. ...)
 	end
 end
 
@@ -44,7 +61,7 @@ function UnifiedCarryWeightFramework.registerBaseModifier(def)
 	assert(def.id ~= nil, "registerBaseModifier(def): def.id is required")
 	assert(type(def.resolve) == "function", "registerBaseModifier(def): def.resolve must be a function")
 
-	print("UCWF | Registering base modifier: " .. tostring(def.id))
+	print("UCWF | UnifiedCarryWeightFramework | Registering base modifier: " .. tostring(def.id))
 
 	UnifiedCarryWeightFramework.baseModifiers[def.id] = def
 	systemShouldRun = true
@@ -57,24 +74,14 @@ function UnifiedCarryWeightFramework.registerMaxModifier(def)
 	assert(def.id ~= nil, "registerMaxModifier(def): def.id is required")
 	assert(type(def.resolve) == "function", "registerMaxModifier(def): def.resolve must be a function")
 
-	print("UCWF | Registering max modifier: " .. tostring(def.id))
+	print("UCWF | UnifiedCarryWeightFramework | Registering max modifier: " .. tostring(def.id))
 	UnifiedCarryWeightFramework.maxModifiers[def.id] = def
 	systemShouldRun = true
 end
 
-local function gameMode()
-	if not isClient() and not isServer() then
-		return "SP"
-	elseif isClient() then
-		return "MP_Client"
-	elseif isServer() then
-		return "MP_Server"
-	end
-end
-
-local function getPlayerList()
-	if gameMode() == "SP" then
-		return { getPlayer() }
+local function getPlayerList(player)
+	if player then
+		return { player }
 	end
 
 	local players = {}
@@ -88,15 +95,17 @@ local function getPlayerList()
 end
 
 --- Function that recomputes the carry weight for players, applying all modifiers in the correct ordering
-function UnifiedCarryWeightFramework.recomputeAll()
+function UnifiedCarryWeightFramework.recomputeAll(player)
 	if not systemShouldRun then
-		log("No carry weight modifiers registered, skipping recompute and unregistering events")
+		UnifiedCarryWeightFramework.log(
+			"No carry weight modifiers registered, skipping recompute and unregistering events"
+		)
 		Events.EveryHours.Remove(recomputeCarryWeight_EveryHours)
 		Events.EveryHours.Remove(debugDumpCarryWeight_EveryHours)
 		return
 	end
-	for _, player in ipairs(getPlayerList()) do
-		log("Recomputing carry weight for player " .. tostring(player:getUsername()))
+	for _, player in ipairs(getPlayerList(player)) do
+		UnifiedCarryWeightFramework.log("Recomputing carry weight for player " .. tostring(player:getUsername()))
 		local originalBaseWeight = 8
 		player:setMaxWeightDelta(1)
 
@@ -106,7 +115,7 @@ function UnifiedCarryWeightFramework.recomputeAll()
 
 		local newBaseWeight =
 			applyModifierPipeline(originalBaseWeight, UnifiedCarryWeightFramework.baseModifiers, baseContext)
-		log("New base weight: " .. tostring(newBaseWeight))
+		UnifiedCarryWeightFramework.log("New base weight: " .. tostring(newBaseWeight))
 		player:setMaxWeightBase(newBaseWeight)
 
 		player:getBodyDamage():Update()
@@ -115,15 +124,15 @@ function UnifiedCarryWeightFramework.recomputeAll()
 			player = player,
 		}
 		local currentMaxWeight = player:getMaxWeight()
-		log("Current max weight before max modifiers: " .. tostring(currentMaxWeight))
+		UnifiedCarryWeightFramework.log("Current max weight before max modifiers: " .. tostring(currentMaxWeight))
 		local newMaxWeight =
 			applyModifierPipeline(currentMaxWeight, UnifiedCarryWeightFramework.maxModifiers, maxContext)
 		if SandboxVars.UnifiedCarryWeightFramework.CapWeight then
 			newMaxWeight = math.min(newMaxWeight, 50)
 		end
-		log("New max weight: " .. tostring(newMaxWeight))
+		UnifiedCarryWeightFramework.log("Target max weight: " .. tostring(newMaxWeight))
 		local deltaToSet = newMaxWeight / player:getMaxWeight()
-		log("Setting max weight delta to: " .. tostring(deltaToSet))
+		UnifiedCarryWeightFramework.log("Setting max weight delta to: " .. tostring(deltaToSet))
 
 		player:setMaxWeightDelta(deltaToSet)
 	end
@@ -133,7 +142,7 @@ end
 ---@param playerIndex number
 ---@param player IsoPlayer
 local function recomputeCarryWeight_OnCreatePlayer(playerIndex, player)
-	UnifiedCarryWeightFramework.recomputeAll()
+	UnifiedCarryWeightFramework.recomputeAll(player)
 end
 
 local function recomputeCarryWeight_EveryHours()
@@ -144,7 +153,7 @@ local function debugDumpCarryWeight_EveryHours()
 	local player = getPlayer()
 	for id, modifier in pairs(UnifiedCarryWeightFramework.baseModifiers) do
 		local result = modifier.resolve({ player = player }) or {}
-		log(
+		UnifiedCarryWeightFramework.log(
 			"Base Modifier: "
 				.. tostring(id)
 				.. " resolved to: { add="
@@ -156,7 +165,7 @@ local function debugDumpCarryWeight_EveryHours()
 	end
 	for id, modifier in pairs(UnifiedCarryWeightFramework.maxModifiers) do
 		local result = modifier.resolve({ player = player }) or {}
-		log(
+		UnifiedCarryWeightFramework.log(
 			"Max Modifier: "
 				.. tostring(id)
 				.. " resolved to: { add="
@@ -168,11 +177,13 @@ local function debugDumpCarryWeight_EveryHours()
 	end
 end
 
-Events.OnCreatePlayer.Remove(recomputeCarryWeight_OnCreatePlayer)
-Events.OnCreatePlayer.Add(recomputeCarryWeight_OnCreatePlayer)
 Events.EveryHours.Remove(recomputeCarryWeight_EveryHours)
 Events.EveryHours.Add(recomputeCarryWeight_EveryHours)
 Events.EveryHours.Remove(debugDumpCarryWeight_EveryHours)
 Events.EveryHours.Add(debugDumpCarryWeight_EveryHours)
+
+-- in case it's SP these 2 will work
+Events.OnCreatePlayer.Remove(recomputeCarryWeight_OnCreatePlayer)
+Events.OnCreatePlayer.Add(recomputeCarryWeight_OnCreatePlayer)
 
 return UnifiedCarryWeightFramework

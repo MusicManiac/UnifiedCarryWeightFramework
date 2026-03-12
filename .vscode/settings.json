@@ -14,5 +14,8 @@
 		"package": "disable"
 	},
 	"Lua.workspace.checkThirdParty": false,
-	"stylua.targetReleaseVersion": "latest"
+	"stylua.targetReleaseVersion": "latest",
+	"cSpell.words": [
+		"UCWF"
+	]
 }
