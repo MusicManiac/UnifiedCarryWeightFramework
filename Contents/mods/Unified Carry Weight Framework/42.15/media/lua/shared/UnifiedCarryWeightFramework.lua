@@ -94,7 +94,8 @@ local function getPlayerList(player)
 	return players
 end
 
---- Function that recomputes the carry weight for players, applying all modifiers in the correct ordering
+--- Function that recomputes the carry weight for player (if passed as an argument) or all players, applying all modifiers in the correct ordering
+--- @param player IsoPlayer|nil
 function UnifiedCarryWeightFramework.recomputeAll(player)
 	if not systemShouldRun then
 		UnifiedCarryWeightFramework.log(
@@ -150,30 +151,32 @@ local function recomputeCarryWeight_EveryHours()
 end
 
 local function debugDumpCarryWeight_EveryHours()
-	local player = getPlayer()
-	for id, modifier in pairs(UnifiedCarryWeightFramework.baseModifiers) do
-		local result = modifier.resolve({ player = player }) or {}
-		UnifiedCarryWeightFramework.log(
-			"Base Modifier: "
-				.. tostring(id)
-				.. " resolved to: { add="
-				.. tostring(result.add)
-				.. ", mult="
-				.. tostring(result.mult)
-				.. "}"
-		)
-	end
-	for id, modifier in pairs(UnifiedCarryWeightFramework.maxModifiers) do
-		local result = modifier.resolve({ player = player }) or {}
-		UnifiedCarryWeightFramework.log(
-			"Max Modifier: "
-				.. tostring(id)
-				.. " resolved to: { add="
-				.. tostring(result.add)
-				.. ", mult="
-				.. tostring(result.mult)
-				.. "}"
-		)
+	for _, player in ipairs(getPlayerList(getPlayer())) do
+		UnifiedCarryWeightFramework.log("Dumping carry weight modifiers for player " .. tostring(player:getUsername()))
+		for id, modifier in pairs(UnifiedCarryWeightFramework.baseModifiers) do
+			local result = modifier.resolve({ player = player }) or {}
+			UnifiedCarryWeightFramework.log(
+				"Base Modifier: "
+					.. tostring(id)
+					.. " resolved to: { add="
+					.. tostring(result.add)
+					.. ", mult="
+					.. tostring(result.mult)
+					.. "}"
+			)
+		end
+		for id, modifier in pairs(UnifiedCarryWeightFramework.maxModifiers) do
+			local result = modifier.resolve({ player = player }) or {}
+			UnifiedCarryWeightFramework.log(
+				"Max Modifier: "
+					.. tostring(id)
+					.. " resolved to: { add="
+					.. tostring(result.add)
+					.. ", mult="
+					.. tostring(result.mult)
+					.. "}"
+			)
+		end
 	end
 end
 
