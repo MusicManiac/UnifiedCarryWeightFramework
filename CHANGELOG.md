@@ -1,3 +1,9 @@
+## v.2.0.1
+###### 12 Mar 2026
+
+- Fixes:
+	- Fixed mod functions running on MP clients (should be ran only on server process)
+	
 ## v.2.0.0
 ###### 12 Mar 2026
 
