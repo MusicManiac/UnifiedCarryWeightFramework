@@ -7,12 +7,14 @@ local function gameMode()
 	return "MP_Server"
 end
 
+local gameMode = gameMode()
+
 -- This should be ran only if it's SP or if it's a server process
-if gameMode() == "MP_Client" then
-	print("UCWF | UnifiedCarryWeightFramework | Detected MP client environment, skipping the file")
+if gameMode == "MP_Client" then
+	print("UCWF | UnifiedCarryWeightFramework | Detected " .. gameMode .. " environment, skipping the file")
 	return
 else
-	print("UCWF | UnifiedCarryWeightFramework | Detected SP or server environment, loading the file")
+	print("UCWF | UnifiedCarryWeightFramework | Detected " .. gameMode .. " environment, loading the file")
 end
 
 UnifiedCarryWeightFramework = UnifiedCarryWeightFramework or {}
@@ -79,6 +81,11 @@ function UnifiedCarryWeightFramework.registerMaxModifier(def)
 	systemShouldRun = true
 end
 
+local playersListCache = nil
+
+--- Function that returns a list of players to apply modifiers for. If player argument is passed, returns a list with just that player, otherwise returns a list of all players (for server).
+--- @param player any
+--- @return table<IsoPlayer>
 local function getPlayerList(player)
 	if player then
 		return { player }
@@ -94,32 +101,11 @@ local function getPlayerList(player)
 	return players
 end
 
---- Function that recomputes the carry weight for player (if passed as an argument) or all players, applying all modifiers in the correct ordering
---- @param player IsoPlayer|nil
-function UnifiedCarryWeightFramework.recomputeAll(player)
-	if not systemShouldRun then
-		UnifiedCarryWeightFramework.log(
-			"No carry weight modifiers registered, skipping recompute and unregistering events"
-		)
-		Events.EveryHours.Remove(recomputeCarryWeight_EveryHours)
-		Events.EveryHours.Remove(debugDumpCarryWeight_EveryHours)
-		return
-	end
-	for _, player in ipairs(getPlayerList(player)) do
-		UnifiedCarryWeightFramework.log("Recomputing carry weight for player " .. tostring(player:getUsername()))
-		local originalBaseWeight = 8
+local function recomputeTotalCarryWeight()
+	for _, player in ipairs(playersListCache) do
+		---@cast player IsoPlayer
+		UnifiedCarryWeightFramework.log("Recomputing max carry weight for player " .. tostring(player:getUsername()))
 		player:setMaxWeightDelta(1)
-
-		local baseContext = {
-			player = player,
-		}
-
-		local newBaseWeight =
-			applyModifierPipeline(originalBaseWeight, UnifiedCarryWeightFramework.baseModifiers, baseContext)
-		UnifiedCarryWeightFramework.log("New base weight: " .. tostring(newBaseWeight))
-		player:setMaxWeightBase(newBaseWeight)
-
-		player:getBodyDamage():Update()
 
 		local maxContext = {
 			player = player,
@@ -139,7 +125,43 @@ function UnifiedCarryWeightFramework.recomputeAll(player)
 	end
 end
 
----Function responsible for initializing all traits logic
+local function recomputeTotalCarryWeightOnTickHelper()
+	recomputeTotalCarryWeight()
+	Events.OnTick.Remove(recomputeTotalCarryWeightOnTickHelper)
+end
+
+--- Function that recomputes the carry weight for player (if passed as an argument) or all players, applying all modifiers in the correct ordering
+--- @param player IsoPlayer|nil
+function UnifiedCarryWeightFramework.recomputeAll(player)
+	if not systemShouldRun then
+		UnifiedCarryWeightFramework.log(
+			"No carry weight modifiers registered, skipping recompute and unregistering events"
+		)
+		Events.EveryHours.Remove(recomputeCarryWeight_EveryHours)
+		Events.EveryHours.Remove(debugDumpCarryWeight_EveryHours)
+		return
+	end
+	playersListCache = getPlayerList(player)
+	for _, player in ipairs(playersListCache) do
+		---@cast player IsoPlayer
+		UnifiedCarryWeightFramework.log("Recomputing base carry weight for player " .. tostring(player:getUsername()))
+		local originalBaseWeight = 8
+		player:setMaxWeightDelta(1)
+
+		local baseContext = {
+			player = player,
+		}
+
+		local newBaseWeight =
+			applyModifierPipeline(originalBaseWeight, UnifiedCarryWeightFramework.baseModifiers, baseContext)
+		UnifiedCarryWeightFramework.log("New base weight: " .. tostring(newBaseWeight))
+		player:setMaxWeightBase(newBaseWeight)
+	end
+	Events.OnTick.Remove(recomputeTotalCarryWeightOnTickHelper)
+	Events.OnTick.Add(recomputeTotalCarryWeightOnTickHelper)
+end
+
+---Just for SP
 ---@param playerIndex number
 ---@param player IsoPlayer
 local function recomputeCarryWeight_OnCreatePlayer(playerIndex, player)

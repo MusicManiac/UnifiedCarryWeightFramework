@@ -7,26 +7,31 @@ local function gameMode()
 	return "MP_Server"
 end
 
-if gameMode() == "MP_Server" then
-	print("UCWF | UnitedCarryWeightFramework_Client | Detected non-client environment, skipping the file")
+local gameMode = gameMode()
+
+if gameMode == "MP_Server" then
+	print("UCWF | UnitedCarryWeightFramework_Client | Detected " .. gameMode .. " environment, skipping the file")
 	return
 else
-	print("UCWF | UnitedCarryWeightFramework_Client | Detected client environment, loading the file")
+	print("UCWF | UnitedCarryWeightFramework_Client | Detected " .. gameMode .. " environment, loading the file")
 end
 
 ---@param playerIndex number
 ---@param player IsoPlayer
 local function recomputeCarryWeight_delayed_OnCreatePlayer(playerIndex, player)
-	local gameMode = gameMode()
 	if gameMode == "SP" then
 		print(
-			"UCWF | UnitedCarryWeightFramework_Client | recomputeCarryWeight_OnCreatePlayer | Detected SP environment, recomputing carry weight directly"
+			"UCWF | UnitedCarryWeightFramework_Client | recomputeCarryWeight_OnCreatePlayer | Detected "
+				.. gameMode
+				.. " environment, recomputing carry weight directly"
 		)
 		require("UnifiedCarryWeightFramework")
 		UnifiedCarryWeightFramework.recomputeAll(player)
 	elseif gameMode == "MP_Client" then
 		print(
-			"UCWF | UnitedCarryWeightFramework_Client | recomputeCarryWeight_OnCreatePlayer | Detected MP client environment, sending command to server to recalculate carry weight"
+			"UCWF | UnitedCarryWeightFramework_Client | recomputeCarryWeight_OnCreatePlayer | Detected "
+				.. gameMode
+				.. " environment, sending command to server to recalculate carry weight"
 		)
 		sendClientCommand(player, "UCWF", "update_weight", {})
 	else

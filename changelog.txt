@@ -3,4 +3,4 @@
 v.2.0.1
 
 Fixes:
-	- Fixed mod functions running on MP clients (should be ran only on server process)
+	- Fixed mod not working on MP
