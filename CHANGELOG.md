@@ -1,8 +1,14 @@
+## v.2.0.2
+###### 11 May 2026
+
+- Fixes:
+	- (Allegedly) Fixed inconsistent max weight application.
+
 ## v.2.0.1
 ###### 12 Mar 2026
 
 - Fixes:
-	- Fixed mod functions running on MP clients (should be ran only on server process)
+	- Fixed mod not working on MP
 	
 ## v.2.0.0
 ###### 12 Mar 2026
