@@ -1,3 +1,9 @@
+## v.2.1.0
+###### 01 Aug 2026
+
+- General
+	- Just fixed outdated example file and bumped the version. No code changes whatsoever.
+
 ## v.2.0.2
 ###### 11 May 2026
 

@@ -1,5 +1,5 @@
 [h1]If you're a user[/h1]
-This doesnt do anything on it's own, the modders are supposed to use this to adjust players carry weight without conflicting with each other.
+This doesn't do anything on it's own, the modders are supposed to use this to adjust players carry weight without conflicting with each other.
 
 [h1]Mods using this framework[/h1]
 And therefore, their weight-related functionalities should not clash.
@@ -7,7 +7,7 @@ And therefore, their weight-related functionalities should not clash.
 [*][url=https://steamcommunity.com/sharedfiles/filedetails?id=2914075159]Evolving Traits World (ETW)[/url]
 [*][url=https://steamcommunity.com/sharedfiles/filedetails?id=1299328280]More Traits[/url]
 [/list]
-If you have a mod that adjusts carry weight in any way and it conflicts with this framework (it will), just bully them into using the framework, it's the only way to have weight changes from different mods play well with each other. If you know a mod that uses this framework you can mention it so I can add it to the list.
+If you have a mod that adjusts carry weight in any way and it conflicts with this framework (it will), just convince them into using the framework, it's the only way to have weight changes from different mods play well with each other. If you know a mod that uses this framework you can mention it so I can add it to the list.
 
 [h1]If you're a modder[/h1]
 You are probably aware that majority of mods that modify carry weight conflict with each other and usually it's just "whichever mod applied their override last" sets the weight.
@@ -23,7 +23,7 @@ So something like this is possible and very easy to do now:
 - Mod B has a trait that gives player 0.25 bonus to base carry weight per point of strength
 - Mod C has a exoskeleton that when worn increases total carry weight by 50%.
 
-There's a client and a server file with example on how to use the framework, in their respective folders.
+There's a client and a server file with example on how to use the framework, in their respective folders. If you need additional help, ping me in my discord.
 
 [h1]GitHub and Discord[/h1]
 If you want to submit translation files, make suggestions or report bugs, the easiest way to do it would be on Discord.
