@@ -82,6 +82,15 @@ function UnifiedCarryWeightFramework.registerMaxModifier(def)
 end
 
 local playersListCache = nil
+local pendingMaxRecomputeTicks = 0
+local pendingPlayersSet = {}
+local pendingAllPlayers = false
+
+local function getFrameworkPlayerData(player)
+	local modData = player:getModData()
+	modData.UCWF = modData.UCWF or {}
+	return modData.UCWF
+end
 
 --- Function that returns a list of players to apply modifiers for. If player argument is passed, returns a list with just that player, otherwise returns a list of all players (for server).
 --- @param player any
@@ -98,19 +107,65 @@ local function getPlayerList(player)
 		players[#players + 1] = onlinePlayers:get(i)
 	end
 
+	if #players == 0 then
+		local localPlayer = getPlayer()
+		if localPlayer then
+			players[#players + 1] = localPlayer
+		end
+	end
+
+	return players
+end
+
+local function queuePlayersForMaxRecompute(player)
+	if player == nil then
+		pendingAllPlayers = true
+		pendingPlayersSet = {}
+		return
+	end
+
+	if pendingAllPlayers then
+		return
+	end
+
+	pendingPlayersSet[player] = true
+end
+
+local function consumeQueuedPlayersForMaxRecompute()
+	if pendingAllPlayers then
+		pendingAllPlayers = false
+		pendingPlayersSet = {}
+		return getPlayerList()
+	end
+
+	local players = {}
+	for player, _ in pairs(pendingPlayersSet) do
+		players[#players + 1] = player
+	end
+	pendingPlayersSet = {}
 	return players
 end
 
 local function recomputeTotalCarryWeight()
 	for _, player in ipairs(playersListCache) do
-		---@cast player IsoPlayer
 		UnifiedCarryWeightFramework.log("Recomputing max carry weight for player " .. tostring(player:getUsername()))
+		local frameworkPlayerData = getFrameworkPlayerData(player)
+		local lastAppliedDelta = frameworkPlayerData.lastAppliedMaxWeightDelta or 1
+		local lastBaseMaxWeight = frameworkPlayerData.lastBaseMaxWeight
 		player:setMaxWeightDelta(1)
 
 		local maxContext = {
 			player = player,
 		}
-		local currentMaxWeight = player:getMaxWeight()
+		local observedMaxWeight = player:getMaxWeight()
+		local currentMaxWeight = observedMaxWeight
+		if lastAppliedDelta > 0 and lastBaseMaxWeight ~= nil then
+			local previousModifiedWeight = lastBaseMaxWeight * lastAppliedDelta
+			if math.abs(observedMaxWeight - previousModifiedWeight) < 0.001 then
+				currentMaxWeight = lastBaseMaxWeight
+			end
+		end
+		UnifiedCarryWeightFramework.log("Observed max weight before normalization: " .. tostring(observedMaxWeight))
 		UnifiedCarryWeightFramework.log("Current max weight before max modifiers: " .. tostring(currentMaxWeight))
 		local newMaxWeight =
 			applyModifierPipeline(currentMaxWeight, UnifiedCarryWeightFramework.maxModifiers, maxContext)
@@ -118,14 +173,25 @@ local function recomputeTotalCarryWeight()
 			newMaxWeight = math.min(newMaxWeight, 50)
 		end
 		UnifiedCarryWeightFramework.log("Target max weight: " .. tostring(newMaxWeight))
-		local deltaToSet = newMaxWeight / player:getMaxWeight()
+		local deltaToSet = newMaxWeight / currentMaxWeight
 		UnifiedCarryWeightFramework.log("Setting max weight delta to: " .. tostring(deltaToSet))
 
 		player:setMaxWeightDelta(deltaToSet)
+		frameworkPlayerData.lastAppliedMaxWeightDelta = deltaToSet
+		frameworkPlayerData.lastBaseMaxWeight = currentMaxWeight
 	end
 end
 
 local function recomputeTotalCarryWeightOnTickHelper()
+	if pendingMaxRecomputeTicks > 0 then
+		pendingMaxRecomputeTicks = pendingMaxRecomputeTicks - 1
+		return
+	end
+	playersListCache = consumeQueuedPlayersForMaxRecompute()
+	if #playersListCache == 0 then
+		Events.OnTick.Remove(recomputeTotalCarryWeightOnTickHelper)
+		return
+	end
 	recomputeTotalCarryWeight()
 	Events.OnTick.Remove(recomputeTotalCarryWeightOnTickHelper)
 end
@@ -141,9 +207,9 @@ function UnifiedCarryWeightFramework.recomputeAll(player)
 		Events.EveryHours.Remove(debugDumpCarryWeight_EveryHours)
 		return
 	end
+	queuePlayersForMaxRecompute(player)
 	playersListCache = getPlayerList(player)
 	for _, player in ipairs(playersListCache) do
-		---@cast player IsoPlayer
 		UnifiedCarryWeightFramework.log("Recomputing base carry weight for player " .. tostring(player:getUsername()))
 		local originalBaseWeight = 8
 		player:setMaxWeightDelta(1)
@@ -158,6 +224,7 @@ function UnifiedCarryWeightFramework.recomputeAll(player)
 		player:setMaxWeightBase(newBaseWeight)
 	end
 	Events.OnTick.Remove(recomputeTotalCarryWeightOnTickHelper)
+	pendingMaxRecomputeTicks = 1
 	Events.OnTick.Add(recomputeTotalCarryWeightOnTickHelper)
 end
 

@@ -24,10 +24,10 @@ end
 --- Example of how to fire weight recalculation from your mod when some CLIENT event happens.
 --- Remember that you're SUPPOSED to name ur event recomputeCarryWeight_EVENTNAME so later when you register and unregister it, you don't overlap code framework twice
 --- More details in server example
-local function recomputeCarryWeight_LevelPerk(character, perk, level, increased)
+local function recomputeCarryWeight_SomeClientSideEvent(character, perk, level, increased)
 	if gameMode == "SP" then
 		print(
-			"YourMod_UCWF | recomputeCarryWeight_LevelPerk | Detected "
+			"YourMod_UCWF | recomputeCarryWeight_SomeClientSideEvent | Detected "
 				.. gameMode
 				.. " environment, recomputing carry weight directly"
 		)
@@ -35,7 +35,7 @@ local function recomputeCarryWeight_LevelPerk(character, perk, level, increased)
 		UnifiedCarryWeightFramework.recomputeAll()
 	elseif gameMode == "MP_Client" then
 		print(
-			"YourMod_UCWF | recomputeCarryWeight_LevelPerk | Detected "
+			"YourMod_UCWF | recomputeCarryWeight_SomeClientSideEvent | Detected "
 				.. gameMode
 				.. " environment, sending command to server to recalculate carry weight"
 		)
@@ -44,5 +44,5 @@ local function recomputeCarryWeight_LevelPerk(character, perk, level, increased)
 	end
 end
 
-Events.LevelPerk.Remove(recomputeCarryWeight_LevelPerk)
-Events.LevelPerk.Add(recomputeCarryWeight_LevelPerk)
+Events.SomeClientSideEvent.Remove(recomputeCarryWeight_SomeClientSideEvent)
+Events.SomeClientSideEvent.Add(recomputeCarryWeight_SomeClientSideEvent)
