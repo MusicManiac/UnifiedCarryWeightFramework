@@ -1,7 +1,13 @@
+## v.2.1.1
+###### 01 Aug 2026
+
+- Fixes:
+	- MP-related fix, the weight for newly loaded players should be adjusted much faster.
+
 ## v.2.1.0
 ###### 01 Aug 2026
 
-- General
+- General:
 	- Just fixed outdated example file and bumped the version. No code changes whatsoever.
 
 ## v.2.0.2
