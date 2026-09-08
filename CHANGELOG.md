@@ -1,3 +1,8 @@
+## Unreleased
+
+- Fixes:
+	- Fixed missing AnimSets and actiongroups folders causing errors when loading a server.
+
 ## v.2.1.1
 ###### 01 Aug 2026
 

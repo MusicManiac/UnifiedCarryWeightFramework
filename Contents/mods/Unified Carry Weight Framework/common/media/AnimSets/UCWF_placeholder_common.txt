@@ -1,0 +1,3 @@
+UCWF does not add custom animation sets.
+This file keeps media/AnimSets in Git and Workshop packages so Project Zomboid's
+server animation scanner can visit the directory without a NoSuchFileException.
